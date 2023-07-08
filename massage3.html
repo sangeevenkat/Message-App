@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Message App</title>
+      
+  <style>
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+      font-family: "Roboto", sans-serif;
+    }
+
+    body {
+      background-color: #fff;
+      padding: 20px;
+    }
+.header-message{
+background-color: rgba(9, 113, 241, 0.2);
+border-radius: 15px ;
+}
+h1{
+padding-top:10px;
+padding-left:10px;
+}
+    .chat--list-wrapper {
+      max-width: 300px;
+      margin: 0 auto;
+    }
+
+    .chat--list {
+      list-style-type: none;
+      margin-top: 10px;
+      padding: 0;
+      background-color: lightgray;
+    }
+
+    .chat--item {
+      display: flex;
+      align-items: center;
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+
+    }
+
+    .chat--item:hover {
+      background-color: rgba(9, 113, 241, 0.2);
+    }
+
+    .chat--item img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+      border:3px solid #3739c4b7;
+    }
+
+    .chat--search {
+      margin-top: 20px;
+      padding: 5px;
+      border: 1px solid #ccc;
+      border-radius: 15px;
+      width: 100%;
+    }
+
+    .chat--search:focus {
+      outline: none;
+      border-color: #0991f1;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat--list-wrapper">
+<div class="header-message">
+<h1>Message</h1>
+    <input type="text" class="chat--search" placeholder="Search People">
+</div>
+    <ul class="chat--list">
+      <!-- Chat items will be dynamically generated here -->
+    </ul>
+<p class="message--no-data" style="display: none;">No data found.</p> <!-- New message element -->
+  </div>
+
+  <script>
+    // Function to fetch data from the API
+    async function fetchData() {
+      try {
+        const response = await fetch('https://randomuser.me/api/?results=10');
+        const data = await response.json();
+        return data.results;
+      } catch (error) {
+        console.log("Error fetching data:", error);
+      }
+    }
+
+    // Function to render chat items
+    function renderChatItems(people) {
+      const chatList = document.querySelector(".chat--list");
+      chatList.innerHTML = "";
+
+      people.forEach((person) => {
+        const item = document.createElement("li");
+        item.className = "chat--item";
+        item.innerHTML = `
+          <img src="${person.picture.thumbnail}" alt="${person.name.first}">
+          <span>${person.name.first} ${person.name.last}</span>
+        `;
+        item.addEventListener("click", () => {
+          console.log(person); // Logging person details to the console
+        });
+
+        chatList.appendChild(item);
+      });
+    }
+
+    // Function to handle search
+    function handleSearch(event, people) {
+      const searchTerm = event.target.value.toLowerCase();
+      const filteredPeople = people.filter(
+        (person) =>
+          person.name.first.toLowerCase().includes(searchTerm) ||
+          person.name.last.toLowerCase().includes(searchTerm)
+      );
+      renderChatItems(filteredPeople);
+// Display or hide the "No data found" message based on the search results
+      const noDataMessage = document.querySelector(".message--no-data");
+      if (filteredPeople.length === 0) {
+        noDataMessage.style.display = "block";
+      } else {
+        noDataMessage.style.display = "none";
+      }
+
+    }
+
+    // Entry point
+    async function initializeApp() {
+      const searchInput = document.querySelector(".chat--search");
+      searchInput.addEventListener("input", (event) =>
+        handleSearch(event, people)
+      );
+
+      const people = await fetchData();
+      renderChatItems(people);
+
+// Display or hide the "No data found" message based on the initial data
+      const noDataMessage = document.querySelector(".message--no-data");
+      if (people.length === 0) {
+        noDataMessage.style.display = "block";
+      } else {
+        noDataMessage.style.display = "none";
+      }
+
+    }
+
+    initializeApp();
+  </script>
+</body>
+</html>
